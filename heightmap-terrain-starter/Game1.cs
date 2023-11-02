@@ -48,6 +48,8 @@ namespace HeightmapTerrainStarter
 
             Texture2D heightmap = Content.Load<Texture2D>("heightmap");
             terrain = new Terrain(this, heightmap, 10f, Matrix.Identity);
+
+            camera.HeightMap = terrain;
         }
 
         /// <summary>

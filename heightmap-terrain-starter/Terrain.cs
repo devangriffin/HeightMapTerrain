@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace HeightmapTerrainStarter
 {
-    public class Terrain
+    public class Terrain : IHeightMap
     {
         Game game;
 
@@ -133,6 +127,39 @@ namespace HeightmapTerrainStarter
             game.GraphicsDevice.Indices = indices;
 
             game.GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleStrip, 0, 0, triangles);
+        }
+
+        public float GetHeightAt(float x, float z)
+        {
+            Matrix inverseWorld = Matrix.Invert(effect.World);
+            Vector3 worldCoordinates = new Vector3(x, 0, z);
+            Vector3 modelCoordinates = Vector3.Transform(worldCoordinates, inverseWorld);
+
+            float tx = modelCoordinates.X;
+            float ty = -modelCoordinates.Z;
+
+            if (tx < 0 || ty < 0 || tx >= width - 2 || ty >= height - 2) { return 0; }
+
+            if (tx - (int)tx < 0.5 && ty - (int)ty < 0.5)
+            {
+                // Lower-Left Triangle
+                float xFraction = tx - (int)tx;
+                float yFraction = ty - (int)ty;
+                float xDifference = heights[(int)tx + 1, (int)ty] - heights[(int)tx, (int)ty];
+                float yDifference = heights[(int)tx, (int)ty + 1] - heights[(int)tx, (int)ty];
+
+                return heights[(int)tx, (int)ty] + xFraction * xDifference + yFraction * yDifference;
+            }
+            else
+            {
+                // Upper-Left Triangle
+                float xFraction = (int)tx + 1 - tx;
+                float yFraction = (int)ty + 1 - ty;
+                float xDifference = heights[(int)tx + 1, (int)ty + 1] - heights[(int)tx, (int)ty + 1];
+                float yDifference = heights[(int)tx + 1, (int)ty + 1] - heights[(int)tx + 1, (int)ty];
+
+                return heights[(int)tx + 1, (int)ty + 1] - xFraction * xDifference - yFraction * yDifference;
+            }
         }
     }
 }

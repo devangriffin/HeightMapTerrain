@@ -18,6 +18,8 @@ namespace HeightmapTerrainStarter
 
         MouseState oldMouseState;
 
+        public IHeightMap HeightMap { get; set; }
+
         Game game;
 
         /// <summary>
@@ -68,6 +70,12 @@ namespace HeightmapTerrainStarter
             // Reset mouse state 
             Mouse.SetPosition(game.Window.ClientBounds.Width / 2, game.Window.ClientBounds.Height / 2);
             oldMouseState = Mouse.GetState();
+
+            // Adjust the camera based off the height map
+            if (HeightMap != null)
+            {
+                position.Y = HeightMap.GetHeightAt(position.X, position.Z) + HeightOffset;
+            }
         }
 
         /// <summary>
